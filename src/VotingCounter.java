@@ -1,23 +1,11 @@
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
-import org.bouncycastle.crypto.signers.PSSSigner;
+import helper.CryptoUtils;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Map;
 
 public class VotingCounter {
 
@@ -52,32 +40,7 @@ public class VotingCounter {
     }
 
     private void createKeyObjectsFromStrings() {
-        // Authority public key
-        StringBuilder pkcs8Lines = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new StringReader(authorityPublicBlindingKeyString));
-        String line;
-        while (true){
-            try {
-                if ((line = reader.readLine()) == null) break;
-                pkcs8Lines.append(line);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        String pkcs8Pem = pkcs8Lines.toString();
-        pkcs8Pem = pkcs8Pem.replace("-----BEGIN PUBLIC KEY-----", "");
-        pkcs8Pem = pkcs8Pem.replace("-----END PUBLIC KEY-----", "");
-        pkcs8Pem = pkcs8Pem.replaceAll("\\s+","");
-
-        byte[] authorityLongTermPublicKeyBytes = Base64.getDecoder().decode(pkcs8Pem);
-        KeySpec keySpec = new X509EncodedKeySpec(authorityLongTermPublicKeyBytes);
-        try {
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            authorityPublicBlindingKey = (RSAPublicKey) kf.generatePublic(keySpec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
+        authorityPublicBlindingKey = (RSAPublicKey) CryptoUtils.createRSAKeyFromString(authorityPublicBlindingKeyString);
     }
 
     private static class ClientHandler implements Runnable {
@@ -113,15 +76,16 @@ public class VotingCounter {
                 return;
             }
 
-            String commitmentString = line.substring(0, 44);
-            String signatureString = line.substring(44);
+            Integer pollId = Integer.parseInt(line.substring(0, 7));
+            String commitmentString = line.substring(7, 51);
+            String signatureString = line.substring(51);
             System.out.println("Commitment: " + commitmentString);
             System.out.println("Signature: " + signatureString);
 
             byte[] commitment = Base64.getDecoder().decode(commitmentString);
             byte[] signature = Base64.getDecoder().decode(signatureString);
 
-            if(!verifySHA256withRSAandPSS(authorityPublicBlindingKey, commitment, signature)) {
+            if(!CryptoUtils.verifySHA256withRSAandPSS(authorityPublicBlindingKey, commitment, signature, saltLength)) {
                 System.out.println("Authority's signature on commitment NOT valid.");
                 return;
             }
@@ -142,15 +106,5 @@ public class VotingCounter {
                 e.printStackTrace();
             }
         }
-    }
-
-    private static Boolean verifySHA256withRSAandPSS(RSAPublicKey verificationKey, byte[] message, byte[] signature){
-        RSAKeyParameters keyParameters = new RSAKeyParameters(false, verificationKey.getModulus(), verificationKey.getPublicExponent());
-
-        PSSSigner signer = new PSSSigner(new RSAEngine(), new SHA256Digest(), saltLength);
-        signer.init(false, keyParameters);
-        signer.update(message, 0, message.length);
-
-        return signer.verifySignature(signature);
     }
 }
