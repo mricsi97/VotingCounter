@@ -2,16 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="38b63c41-d5a6-4aba-85a2-4e093589c561" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/VotingCounter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/data/Ballot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VotingCounter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/VotingCounter.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/VotingCounter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/helper/CryptoUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/helper/CryptoUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/VotingCounter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/VotingCounter.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -90,46 +82,46 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="1220" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1588179615905" />
-    <state width="1877" height="496" key="GridCell.Tab.0.bottom" timestamp="1589644146157">
+    <state width="914" height="361" key="GridCell.Tab.0.bottom" timestamp="1589726578223">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="496" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1589644146157" />
-    <state width="1877" height="496" key="GridCell.Tab.0.center" timestamp="1589644146157">
+    <state width="914" height="361" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1589726578223" />
+    <state width="914" height="361" key="GridCell.Tab.0.center" timestamp="1589726578223">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="496" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1589644146157" />
-    <state width="1877" height="496" key="GridCell.Tab.0.left" timestamp="1589644146157">
+    <state width="914" height="361" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1589726578223" />
+    <state width="914" height="361" key="GridCell.Tab.0.left" timestamp="1589726578222">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="496" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1589644146157" />
-    <state width="1877" height="496" key="GridCell.Tab.0.right" timestamp="1589644146157">
+    <state width="914" height="361" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1589726578222" />
+    <state width="914" height="361" key="GridCell.Tab.0.right" timestamp="1589726578223">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="496" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1589644146157" />
-    <state width="914" height="174" key="GridCell.Tab.1.bottom" timestamp="1589577688295">
+    <state width="914" height="361" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1589726578223" />
+    <state width="1877" height="271" key="GridCell.Tab.1.bottom" timestamp="1589661445910">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="914" height="174" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1589577688295" />
-    <state width="914" height="174" key="GridCell.Tab.1.center" timestamp="1589577688295">
+    <state width="1877" height="271" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1589661445910" />
+    <state width="1877" height="271" key="GridCell.Tab.1.center" timestamp="1589661445910">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="914" height="174" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1589577688295" />
-    <state width="914" height="174" key="GridCell.Tab.1.left" timestamp="1589577688295">
+    <state width="1877" height="271" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1589661445910" />
+    <state width="1877" height="271" key="GridCell.Tab.1.left" timestamp="1589661445910">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="914" height="174" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1589577688295" />
-    <state width="914" height="174" key="GridCell.Tab.1.right" timestamp="1589577688295">
+    <state width="1877" height="271" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1589661445910" />
+    <state width="1877" height="271" key="GridCell.Tab.1.right" timestamp="1589661445910">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="914" height="174" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1589577688295" />
+    <state width="1877" height="271" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1589661445910" />
     <state x="864" y="98" key="SettingsEditor" timestamp="1588179623459">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="864" y="98" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1588179623459" />
-    <state x="1136" y="344" key="com.intellij.ide.util.TipDialog" timestamp="1589629576431">
+    <state x="1136" y="344" key="com.intellij.ide.util.TipDialog" timestamp="1589725982240">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="1136" y="344" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1589629576431" />
+    <state x="1136" y="344" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1589725982240" />
     <state x="1096" y="374" key="run.anything.popup" timestamp="1589568573924">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -138,5 +130,16 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="143" y="230" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1589508493728" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/VotingCounter.java</url>
+          <line>724</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

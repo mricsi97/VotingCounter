@@ -8,13 +8,12 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 public class VotingCounter {
 
@@ -43,6 +42,7 @@ public class VotingCounter {
     private static HashMap<Integer, HashMap<Integer, Ballot>> bulletinBoard = new HashMap<>();
     // <pollId, <candidate, voteCount>>
     private static HashMap<Integer, HashMap<String, Integer>> validVoteLists = new HashMap<>();
+    private static HashMap<Integer, HashMap<String, Integer>> tally = new HashMap<>();
     // <pollId, <ballotId>>
     private static HashMap<Integer, HashSet<Integer>> alreadyOpenedLists;
     // <pollId, expireTime>
@@ -57,15 +57,35 @@ public class VotingCounter {
         readValidVotesFile();
         readAlreadyOpenedFile();
 
+        long lastTime = Calendar.getInstance().getTimeInMillis();
+
         try (ServerSocket serverSocket = new ServerSocket(6869)) {
+            serverSocket.setSoTimeout(60 * 1000);
+
             while (true) {
+                // Tally polls every 55 seconds
+                long currentTime = Calendar.getInstance().getTimeInMillis();
+                if ((currentTime - lastTime) / 1000L > 55L) {
+                    fetchPollsFromAuthority();
+                    tallyPolls();
+                    lastTime = currentTime;
+                }
+
                 System.out.println("Waiting for client to connect...");
-                Socket client = serverSocket.accept();
+                Socket client = null;
+                try {
+                    client = serverSocket.accept();
+                } catch (SocketTimeoutException e) {
+                    System.out.println("Socket accept timed out after 1 minute.");
+                    continue;
+                }
                 System.out.println("Client connected");
+
                 ClientHandler clientHandler = new ClientHandler(client);
                 new Thread(clientHandler).start();
             }
         } catch (IOException e) {
+            System.err.println("Failed opening socket.");
             e.printStackTrace();
         }
     }
@@ -92,7 +112,7 @@ public class VotingCounter {
                 System.out.println("Waiting for data...");
 
                 String command = in.readLine();
-                if(command.equals("open ballot")) {
+                if (command.equals("open ballot")) {
                     String pollIdString = in.readLine();
                     String ballotIdString = in.readLine();
                     String vote = in.readLine();
@@ -109,7 +129,7 @@ public class VotingCounter {
 
                     openBallot(pollId, ballotId, vote, commitmentSecret);
                     sendResultToClient();
-                } else if(command.equals("cast vote")) {
+                } else if (command.equals("cast vote")) {
                     String pollIdString = in.readLine();
                     String commitmentString = in.readLine();
                     String signatureString = in.readLine();
@@ -139,17 +159,17 @@ public class VotingCounter {
             }
         }
 
-        private void castVote(Integer pollId, byte[] commitment, byte[] signature){
+        private void castVote(Integer pollId, byte[] commitment, byte[] signature) {
             // Check if poll has a record
             long currentTime = Calendar.getInstance().getTimeInMillis();
-            if(!pollExpirations.containsKey(pollId)){
+            if (!pollExpirations.containsKey(pollId)) {
                 // Try to fetch polls for 30 seconds
                 long startTime = currentTime;
-                while(!fetchPollsFromAuthority() && (currentTime - startTime) / 1000L < 35L){
+                while (!fetchPollsFromAuthority() && (currentTime - startTime) / 1000L < 30L) {
                     currentTime = Calendar.getInstance().getTimeInMillis();
                 }
 
-                if(!pollExpirations.containsKey(pollId)){
+                if (!pollExpirations.containsKey(pollId)) {
                     System.out.println("No poll found with the given poll ID.");
                     resultForClient = COUNTER_RESULT_POLL_NOT_FOUND;
                     sendResultToClient();
@@ -159,7 +179,7 @@ public class VotingCounter {
 
             // Check if poll is expired
             long expirationTime = pollExpirations.get(pollId);
-            if(expirationTime < currentTime){
+            if (expirationTime < currentTime) {
                 System.out.println("Poll is expired.");
                 resultForClient = COUNTER_RESULT_POLL_EXPIRED;
                 sendResultToClient();
@@ -180,7 +200,7 @@ public class VotingCounter {
 
             // Put ballot on the bulletin board of the poll
             HashMap<Integer, Ballot> ballots;
-            if(bulletinBoard.containsKey(pollId)) {
+            if (bulletinBoard.containsKey(pollId)) {
                 ballots = bulletinBoard.get(pollId);
             } else {
                 ballots = new HashMap<>();
@@ -210,15 +230,15 @@ public class VotingCounter {
             }
         }
 
-        private void openBallot(Integer pollId, Integer ballotId, String vote, byte[] commitmentSecret){
+        private void openBallot(Integer pollId, Integer ballotId, String vote, byte[] commitmentSecret) {
             // Check if poll exists
-            if(!bulletinBoard.containsKey(pollId)){
+            if (!bulletinBoard.containsKey(pollId)) {
                 System.out.println("Given poll doesn't exist.");
                 return;
             }
 
             // Check if ballot exists
-            if(!bulletinBoard.get(pollId).containsKey(ballotId)) {
+            if (!bulletinBoard.get(pollId).containsKey(ballotId)) {
                 resultForClient = COUNTER_RESULT_WRONG_BALLOT_ID;
                 System.out.println("Ballot to open doesn't exist.");
                 return;
@@ -227,9 +247,9 @@ public class VotingCounter {
             Ballot ballot = bulletinBoard.get(pollId).get(ballotId);
 
             // Check if ballot has already been opened
-            if(alreadyOpenedLists.containsKey(pollId)) {
+            if (alreadyOpenedLists.containsKey(pollId)) {
                 HashSet<Integer> alreadyOpenedList = alreadyOpenedLists.get(pollId);
-                if(alreadyOpenedList.contains(ballotId)) {
+                if (alreadyOpenedList.contains(ballotId)) {
                     resultForClient = COUNTER_RESULT_ALREADY_OPEN;
                     System.out.println("Ballot has already been opened.");
                     return;
@@ -254,10 +274,10 @@ public class VotingCounter {
                 HashMap<String, Integer> validVoteList;
                 HashSet<Integer> alreadyOpenedList;
                 Integer voteCount = 0;
-                if(validVoteLists.containsKey(pollId)) {
+                if (validVoteLists.containsKey(pollId)) {
                     validVoteList = validVoteLists.get(pollId);
                     alreadyOpenedList = alreadyOpenedLists.get(pollId);
-                    if(validVoteList.containsKey(vote)) {
+                    if (validVoteList.containsKey(vote)) {
                         voteCount = validVoteList.get(vote);
                     }
                 } else {
@@ -300,66 +320,65 @@ public class VotingCounter {
                 }
             }
         }
+    }
 
-        private Boolean fetchPollsFromAuthority() {
-            // while(!isCancelled())
-            pollExpirations = new HashMap<>();
-            System.out.println("Connecting to authority...");
-            try (Socket socket = new Socket()) {
-                socket.connect(new InetSocketAddress(serverIp, authorityPort), 10 * 1000);
-                System.out.println("Connected successfully");
+    private Boolean fetchPollsFromAuthority() {
+        // while(!isCancelled())
+        System.out.println("Connecting to authority...");
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(serverIp, authorityPort), 10 * 1000);
+            System.out.println("Connected successfully");
 
-                PrintWriter out;
-                try {
-                    out = new PrintWriter(socket.getOutputStream(), true);
-                    System.out.println("Fetching polls...");
-                    out.println("fetch polls");
-                    System.out.println("Request sent");
-                } catch (IOException e) {
-                    System.err.println("Failed sending fetch request to authority.");
-                    e.printStackTrace();
-                } finally {
-                    socket.shutdownOutput();
+            PrintWriter out;
+            try {
+                out = new PrintWriter(socket.getOutputStream(), true);
+                System.out.println("Fetching polls...");
+                out.println("fetch polls");
+                System.out.println("Request sent");
+            } catch (IOException e) {
+                System.err.println("Failed sending fetch request to authority.");
+                e.printStackTrace();
+            } finally {
+                socket.shutdownOutput();
+            }
+
+            try (InputStreamReader isr = new InputStreamReader(socket.getInputStream());
+                 BufferedReader in = new BufferedReader(isr)) {
+                System.out.println("Waiting for polls...");
+                String answer = in.readLine();
+                if (answer.equals("no polls")) {
+                    System.out.println("No polls received.");
+                    return false;
                 }
+                if (answer.equals("sending polls")) {
+                    pollExpirations = new HashMap<>();
+                    String pollId;
+                    while ((pollId = in.readLine()) != null) {
+                        in.readLine();
+                        Long expireTime = Long.parseLong(in.readLine());
+                        in.readLine();
 
-                try (InputStreamReader isr = new InputStreamReader(socket.getInputStream());
-                     BufferedReader in = new BufferedReader(isr)) {
-                    System.out.println("Waiting for polls...");
-                    String answer = in.readLine();
-                    if (answer.equals("no polls")) {
-                        System.out.println("No polls received.");
-                        return false;
+                        pollExpirations.put(Integer.parseInt(pollId), expireTime);
                     }
-                    if (answer.equals("sending polls")) {
-                        String pollId;
-                        while ((pollId = in.readLine()) != null) {
-                            in.readLine();
-                            Long expireTime = Long.parseLong(in.readLine());
-                            in.readLine();
-
-                            pollExpirations.put(Integer.parseInt(pollId), expireTime);
-                        }
-                        System.out.println("Received polls");
-                    }
-                } catch (IOException e) {
-                    System.err.println("Failed receiving polls from authority.");
-                    e.printStackTrace();
+                    System.out.println("Received polls");
                 }
             } catch (IOException e) {
-                System.err.println("Failed connecting to the authority with the given IP address and port.");
+                System.err.println("Failed receiving polls from authority.");
                 e.printStackTrace();
             }
-            return true;
+        } catch (IOException e) {
+            System.err.println("Failed connecting to the authority with the given IP address and port.");
         }
+        return true;
     }
 
     // Reads 'ballots' file, then builds 'ballotIds' and 'bulletinBoard'
-    private void readBallotsFile(){
+    private void readBallotsFile() {
         ballotIds = new HashSet<>();
         bulletinBoard = new HashMap<Integer, HashMap<Integer, Ballot>>();
 
         File ballotsFile = new File(System.getProperty("user.dir") + "/ballots.json");
-        if(!ballotsFile.exists()){
+        if (!ballotsFile.exists()) {
             System.out.println("Ballots file doesn't exist.");
             return;
         }
@@ -383,19 +402,19 @@ public class VotingCounter {
             e.printStackTrace();
         }
 
-        if(pollArray == null){
+        if (pollArray == null) {
             System.out.println("Ballots file was empty.");
             return;
         }
 
-        for(JsonValue pollValue : pollArray){
+        for (JsonValue pollValue : pollArray) {
             JsonObject pollObject = pollValue.asJsonObject();
 
             Integer pollId = pollObject.getInt("poll id");
             JsonArray ballotArray = pollObject.getJsonArray("ballots");
 
             HashMap<Integer, Ballot> ballots = new HashMap<>();
-            for(JsonValue ballotValue : ballotArray){
+            for (JsonValue ballotValue : ballotArray) {
                 JsonObject ballotObject = ballotValue.asJsonObject();
 
                 Integer ballotId = ballotObject.getInt("ballot id");
@@ -419,7 +438,7 @@ public class VotingCounter {
         validVoteLists = new HashMap<Integer, HashMap<String, Integer>>();
 
         File validVotesFile = new File(System.getProperty("user.dir") + "/valid_votes.json");
-        if(!validVotesFile.exists()){
+        if (!validVotesFile.exists()) {
             System.out.println("Valid votes file doesn't exist.");
             return;
         }
@@ -443,19 +462,19 @@ public class VotingCounter {
             e.printStackTrace();
         }
 
-        if(pollArray == null){
+        if (pollArray == null) {
             System.out.println("Valid votes file was empty.");
             return;
         }
 
-        for(JsonValue pollValue : pollArray){
+        for (JsonValue pollValue : pollArray) {
             JsonObject pollObject = pollValue.asJsonObject();
 
             Integer pollId = pollObject.getInt("poll id");
             JsonArray votesArray = pollObject.getJsonArray("votes");
 
             HashMap<String, Integer> votes = new HashMap<>();
-            for(JsonValue voteValue : votesArray){
+            for (JsonValue voteValue : votesArray) {
                 JsonObject voteObject = voteValue.asJsonObject();
 
                 String vote = voteObject.getString("vote");
@@ -469,11 +488,11 @@ public class VotingCounter {
     }
 
     // Reads 'already_opened' file, then build 'alreadyOpenedLists'
-    private void readAlreadyOpenedFile(){
+    private void readAlreadyOpenedFile() {
         alreadyOpenedLists = new HashMap<Integer, HashSet<Integer>>();
 
         File alreadyOpenedFile = new File(System.getProperty("user.dir") + "/already_opened.json");
-        if(!alreadyOpenedFile.exists()){
+        if (!alreadyOpenedFile.exists()) {
             System.out.println("'Already opened' file doesn't exist.");
             return;
         }
@@ -497,19 +516,19 @@ public class VotingCounter {
             e.printStackTrace();
         }
 
-        if(pollArray == null){
+        if (pollArray == null) {
             System.out.println("'Already opened' file was empty.");
             return;
         }
 
-        for(JsonValue pollValue : pollArray){
+        for (JsonValue pollValue : pollArray) {
             JsonObject pollObject = pollValue.asJsonObject();
 
             Integer pollId = pollObject.getInt("poll id");
 
             JsonArray ballotArray = pollObject.getJsonArray("ballots");
             HashSet<Integer> ballots = new HashSet<>();
-            for(JsonValue ballotValue : ballotArray){
+            for (JsonValue ballotValue : ballotArray) {
                 JsonObject ballotObject = ballotValue.asJsonObject();
                 Integer ballotId = ballotObject.getInt("ballot id");
                 ballots.add(ballotId);
@@ -525,9 +544,9 @@ public class VotingCounter {
         JsonArrayBuilder ballotArrayBuilder = Json.createArrayBuilder();
         JsonObjectBuilder ballotBuilder = Json.createObjectBuilder();
 
-        for(Map.Entry<Integer, HashMap<Integer, Ballot>> pollEntry : bulletinBoard.entrySet()) {
+        for (Map.Entry<Integer, HashMap<Integer, Ballot>> pollEntry : bulletinBoard.entrySet()) {
             pollBuilder.add("poll id", pollEntry.getKey());
-            for(Map.Entry<Integer, Ballot> ballotEntry : pollEntry.getValue().entrySet()){
+            for (Map.Entry<Integer, Ballot> ballotEntry : pollEntry.getValue().entrySet()) {
                 ballotBuilder.add("ballot id", ballotEntry.getKey());
 
                 Ballot ballot = ballotEntry.getValue();
@@ -568,15 +587,15 @@ public class VotingCounter {
         System.out.println("Writing ballots file completed successfully.");
     }
 
-    private void writeValidVotesFile(){
+    private void writeValidVotesFile() {
         JsonArrayBuilder pollArrayBuilder = Json.createArrayBuilder();
         JsonObjectBuilder pollBuilder = Json.createObjectBuilder();
         JsonArrayBuilder voteArrayBuilder = Json.createArrayBuilder();
         JsonObjectBuilder voteBuilder = Json.createObjectBuilder();
 
-        for(Map.Entry<Integer, HashMap<String, Integer>> pollEntry : validVoteLists.entrySet()){
+        for (Map.Entry<Integer, HashMap<String, Integer>> pollEntry : validVoteLists.entrySet()) {
             pollBuilder.add("poll id", pollEntry.getKey());
-            for(Map.Entry<String, Integer> voteEntry : pollEntry.getValue().entrySet()){
+            for (Map.Entry<String, Integer> voteEntry : pollEntry.getValue().entrySet()) {
                 voteBuilder.add("vote", voteEntry.getKey());
                 voteBuilder.add("count", voteEntry.getValue());
                 voteArrayBuilder.add(voteBuilder);
@@ -610,15 +629,15 @@ public class VotingCounter {
         System.out.println("Writing valid votes file completed successfully.");
     }
 
-    private void writeAlreadyOpenedFile(){
+    private void writeAlreadyOpenedFile() {
         JsonArrayBuilder pollArrayBuilder = Json.createArrayBuilder();
         JsonObjectBuilder pollBuilder = Json.createObjectBuilder();
         JsonArrayBuilder ballotArrayBuilder = Json.createArrayBuilder();
         JsonObjectBuilder ballotBuilder = Json.createObjectBuilder();
 
-        for(Map.Entry<Integer, HashSet<Integer>> pollEntry : alreadyOpenedLists.entrySet()){
+        for (Map.Entry<Integer, HashSet<Integer>> pollEntry : alreadyOpenedLists.entrySet()) {
             pollBuilder.add("poll id", pollEntry.getKey());
-            for(Integer ballotId : pollEntry.getValue()){
+            for (Integer ballotId : pollEntry.getValue()) {
                 ballotBuilder.add("ballot id", ballotId);
                 ballotArrayBuilder.add(ballotBuilder);
             }
@@ -651,7 +670,68 @@ public class VotingCounter {
         System.out.println("Writing 'already opened' file completed successfully.");
     }
 
-    private void closeExpiredPolls() {
-        // TODO: tally votes: write expired + 1min polls' results to file
+    private void writeTallyFile() {
+        JsonArrayBuilder pollArrayBuilder = Json.createArrayBuilder();
+        JsonObjectBuilder pollBuilder = Json.createObjectBuilder();
+        JsonArrayBuilder voteArrayBuilder = Json.createArrayBuilder();
+        JsonObjectBuilder voteBuilder = Json.createObjectBuilder();
+
+        for (Map.Entry<Integer, HashMap<String, Integer>> pollEntry : tally.entrySet()) {
+            pollBuilder.add("poll id", pollEntry.getKey());
+            for (Map.Entry<String, Integer> voteEntry : pollEntry.getValue().entrySet()) {
+                voteBuilder.add("vote", voteEntry.getKey());
+                voteBuilder.add("count", voteEntry.getValue());
+                voteArrayBuilder.add(voteBuilder);
+
+            }
+            pollBuilder.add("votes", voteArrayBuilder);
+            pollArrayBuilder.add(pollBuilder);
+        }
+
+        JsonArray pollArray = pollArrayBuilder.build();
+
+        File tallyFile = new File(System.getProperty("user.dir") + "/tally.json");
+
+        // Format JSON to readable form instead of one line
+        final Map<String, Object> properties = new HashMap<String, Object>(1);
+        properties.put(JsonGenerator.PRETTY_PRINTING, true);
+        JsonWriterFactory jwf = Json.createWriterFactory(properties);
+
+        try (FileOutputStream fos = new FileOutputStream(tallyFile);
+             OutputStreamWriter osw = new OutputStreamWriter(fos);
+             JsonWriter jsonWriter = jwf.createWriter(osw)) {
+
+            jsonWriter.writeArray(pollArray);
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Tally file not found.");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("Couldn't write tally file.");
+            e.printStackTrace();
+        }
+        System.out.println("Writing tally file completed successfully.");
+    }
+
+    // Writes results of polls that have been expired for 2 minutes to a file
+    private void tallyPolls() {
+        tally = new HashMap<Integer, HashMap<String, Integer>>();
+
+        if(pollExpirations.isEmpty()){
+            System.out.println("No expiration record found.");
+            return;
+        }
+
+        long currentTime = Calendar.getInstance().getTimeInMillis();
+        for (Map.Entry<Integer, Long> expiration : pollExpirations.entrySet()) {
+            if (expiration.getValue() + 120L * 1000L < currentTime) {
+                Integer pollId = expiration.getKey();
+                if (validVoteLists.containsKey(pollId)) {
+                    tally.put(pollId, validVoteLists.get(pollId));
+                }
+            }
+        }
+
+        writeTallyFile();
     }
 }
