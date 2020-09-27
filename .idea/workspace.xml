@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="38b63c41-d5a6-4aba-85a2-4e093589c561" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VotingCounter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/VotingCounter.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/VotingCounter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/VotingCounter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/META-INF/VotingCounter.kotlin_module" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,10 +32,11 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="C:/Program Files/AdoptOpenJDK/jdk-8.0.242.08-hotspot/jre/lib/ext/bcprov-jdk15on-1.65.jar!/" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RunManager">
     <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
@@ -58,88 +61,25 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="1032" y="182" key="#Project_Structure" timestamp="1589307450681">
+    <state width="914" height="361" key="GridCell.Tab.0.bottom" timestamp="1601208966333">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="1032" y="182" key="#Project_Structure/0.0.1920.1040@0.0.1920.1040" timestamp="1589307450681" />
-    <state x="828" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1588184004922">
+    <state width="914" height="361" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1601208966333" />
+    <state width="914" height="361" key="GridCell.Tab.0.center" timestamp="1601208966333">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="828" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1588184004922" />
-    <state x="1189" y="233" key="#com.intellij.ide.util.MemberChooser" timestamp="1588177125996">
+    <state width="914" height="361" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1601208966333" />
+    <state width="914" height="361" key="GridCell.Tab.0.left" timestamp="1601208966332">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="1189" y="233" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1588177125996" />
-    <state x="1103" y="307" key="#com.intellij.ide.util.TreeClassChooserDialog" timestamp="1588184002572">
+    <state width="914" height="361" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1601208966332" />
+    <state width="914" height="361" key="GridCell.Tab.0.right" timestamp="1601208966333">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="1103" y="307" key="#com.intellij.ide.util.TreeClassChooserDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1588184002572" />
-    <state x="203" y="209" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog" timestamp="1589555743798">
+    <state width="914" height="361" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1601208966333" />
+    <state x="1136" y="607" key="com.intellij.ide.util.TipDialog" timestamp="1601207228394">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="203" y="209" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1589555743798" />
-    <state x="1220" y="275" key="FileChooserDialogImpl" timestamp="1588179615905">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="1220" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1588179615905" />
-    <state width="914" height="361" key="GridCell.Tab.0.bottom" timestamp="1589726578223">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="914" height="361" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1589726578223" />
-    <state width="914" height="361" key="GridCell.Tab.0.center" timestamp="1589726578223">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="914" height="361" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1589726578223" />
-    <state width="914" height="361" key="GridCell.Tab.0.left" timestamp="1589726578222">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="914" height="361" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1589726578222" />
-    <state width="914" height="361" key="GridCell.Tab.0.right" timestamp="1589726578223">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="914" height="361" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1589726578223" />
-    <state width="1877" height="271" key="GridCell.Tab.1.bottom" timestamp="1589661445910">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="271" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1589661445910" />
-    <state width="1877" height="271" key="GridCell.Tab.1.center" timestamp="1589661445910">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="271" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1589661445910" />
-    <state width="1877" height="271" key="GridCell.Tab.1.left" timestamp="1589661445910">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="271" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1589661445910" />
-    <state width="1877" height="271" key="GridCell.Tab.1.right" timestamp="1589661445910">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="271" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1589661445910" />
-    <state x="864" y="98" key="SettingsEditor" timestamp="1588179623459">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="864" y="98" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1588179623459" />
-    <state x="1136" y="344" key="com.intellij.ide.util.TipDialog" timestamp="1589725982240">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="1136" y="344" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1589725982240" />
-    <state x="1096" y="374" key="run.anything.popup" timestamp="1589568573924">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="1096" y="374" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1589568573924" />
-    <state x="143" y="230" width="672" height="678" key="search.everywhere.popup" timestamp="1589508493728">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="143" y="230" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1589508493728" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/VotingCounter.java</url>
-          <line>724</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <state x="1136" y="607" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1601207228394" />
   </component>
 </project>

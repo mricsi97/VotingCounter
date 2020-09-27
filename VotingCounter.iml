@@ -12,8 +12,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="bcprov-jdk15on-1.65" level="project" />
-    <orderEntry type="library" name="Maven: javax.json:javax.json-api:1.1.4" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish:javax.json:1.1.4" level="project" />
+    <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.65" level="project" />
+    <orderEntry type="library" name="Maven: org.bouncycastle:bcpkix-jdk15on:1.65" level="project" />
     <orderEntry type="library" name="Maven: javax.json:javax.json-api:1.1.4" level="project" />
     <orderEntry type="library" name="Maven: org.glassfish:javax.json:1.1.4" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.65" level="project" />

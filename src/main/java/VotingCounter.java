@@ -11,9 +11,9 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
-import java.util.concurrent.TimeoutException;
 
 public class VotingCounter {
 
@@ -23,20 +23,13 @@ public class VotingCounter {
     private static final String COUNTER_RESULT_VOTE_VALID = "COUNTER_RESULT_VOTE_VALID";
     private static final String COUNTER_RESULT_ALREADY_OPEN = "COUNTER_RESULT_ALREADY_OPEN";
     private static final String COUNTER_RESULT_WRONG_BALLOT_ID = "COUNTER_RESULT_WRONG_BALLOT_ID";
+    private static final String COUNTER_RESULT_INVALID_SIGNATURE = "COUNTER_RESULT_INVALID_SIGNATURE";
 
-    static final String serverIp = "192.168.1.8";
+    static final String serverIp = "192.168.0.153";
     static final int authorityPort = 6868;
-    private static int saltLength = 20;
+    private static int saltLength = 32;
 
-    private static RSAPublicKey authorityPublicBlindingKey;
-    private static final String authorityPublicBlindingKeyString =
-            "-----BEGIN PUBLIC KEY-----\n" +
-                    "MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgF8hrv+1z1yMJA6UFZ5J/uFQ+Xp9\n" +
-                    "hq/iT4ibZz2a7JpZf7VO3jJaQsiMowubOvpm70rmBUTPZdP9U7uHaRXPcL++oNIX\n" +
-                    "pG/5Nfv1sUSIA97pfAJiUjqSVNX/VVud4wxs+F6Rn1a6QEf3NukDF8Yc9BPRJF5o\n" +
-                    "Nmf8GXzGZp1AgGgdAgMBAAE=\n" +
-                    "-----END PUBLIC KEY-----";
-
+    private static RSAPublicKey authorityVerificationKey;
 
     // <pollId, <ballotId, Ballot>>
     private static HashMap<Integer, HashMap<Integer, Ballot>> bulletinBoard = new HashMap<>();
@@ -52,7 +45,7 @@ public class VotingCounter {
     private static final SecureRandom random = new SecureRandom();
 
     public void start() {
-        createKeyObjectsFromStrings();
+        loadVerificationKey();
         readBallotsFile();
         readValidVotesFile();
         readAlreadyOpenedFile();
@@ -90,8 +83,23 @@ public class VotingCounter {
         }
     }
 
-    private void createKeyObjectsFromStrings() {
-        authorityPublicBlindingKey = (RSAPublicKey) CryptoUtils.createRSAKeyFromString(authorityPublicBlindingKeyString);
+    private void loadVerificationKey() {
+        final File keyFile = new File(System.getProperty("user.dir") + "/authority_public.pem");
+
+        StringBuilder pemBuilder = new StringBuilder();
+        try (FileReader fr = new FileReader(keyFile);
+             BufferedReader br = new BufferedReader(fr)) {
+            String line;
+            while((line = br.readLine()) != null) {
+                pemBuilder.append(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed reading verification key file.");
+            e.printStackTrace();
+        }
+
+        String pem = pemBuilder.toString();
+        authorityVerificationKey = (RSAPublicKey) CryptoUtils.createRSAKeyFromString(pem);
     }
 
     private class ClientHandler implements Runnable {
@@ -186,8 +194,11 @@ public class VotingCounter {
                 return;
             }
 
-            if (!CryptoUtils.verifySHA256withRSAandPSS(authorityPublicBlindingKey, commitment, signature, saltLength)) {
+            // Verify authority's signature
+            if (!CryptoUtils.verifySHA256withRSAandPSS(authorityVerificationKey, commitment, signature, saltLength)) {
                 System.out.println("Authority's signature on commitment NOT valid.");
+                resultForClient = COUNTER_RESULT_INVALID_SIGNATURE;
+                sendResultToClient();
                 return;
             }
             System.out.println("Authority's signature on commitment valid.");
@@ -261,7 +272,7 @@ public class VotingCounter {
             byte[] voteBytes = vote.getBytes(StandardCharsets.UTF_8);
             Commitment commitment = new Commitment(commitmentSecret, ballot.getCommitment());
 
-            boolean isValid = false;
+            boolean isValid;
             try {
                 isValid = committer.isRevealed(commitment, voteBytes);
             } catch (Exception e) {
