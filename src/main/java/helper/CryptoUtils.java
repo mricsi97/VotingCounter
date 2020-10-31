@@ -23,7 +23,10 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class CryptoUtils {
-    public static Boolean verifySHA256withRSAandPSS(RSAPublicKey verificationKey, byte[] message, byte[] signature, int saltLength){
+
+    private static int saltLength = 32;
+
+    public static Boolean verifySHA256withRSAandPSS(RSAPublicKey verificationKey, byte[] message, byte[] signature){
         RSAKeyParameters keyParameters = new RSAKeyParameters(false, verificationKey.getModulus(), verificationKey.getPublicExponent());
 
         PSSSigner signer = new PSSSigner(new RSAEngine(), new SHA256Digest(), saltLength);
