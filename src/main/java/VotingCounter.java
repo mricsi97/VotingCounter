@@ -36,10 +36,10 @@ public class VotingCounter {
     private static final ConcurrentHashMap<Integer, ConcurrentHashMap<String, Integer>> validVoteLists = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Integer, ConcurrentHashMap<String, Integer>> tally = new ConcurrentHashMap<>();
     // <pollId, <ballotId>>
-    private static ConcurrentHashMap<Integer, Set<Integer>> alreadyOpenedLists = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Integer, Set<Integer>> alreadyOpenedLists = new ConcurrentHashMap<>();
     // <pollId, expireTime>
     private static final ConcurrentHashMap<Integer, Long> pollExpirations = new ConcurrentHashMap<>();
-    private static Set<Integer> ballotIds = Collections.synchronizedSet(new HashSet<>());
+    private static final Set<Integer> ballotIds = Collections.synchronizedSet(new HashSet<>());
 
     private static final SecureRandom random = new SecureRandom();
 
