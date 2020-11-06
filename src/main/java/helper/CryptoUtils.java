@@ -3,6 +3,9 @@ package helper;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.crypto.Commitment;
+import org.bouncycastle.crypto.Committer;
+import org.bouncycastle.crypto.commitments.GeneralHashCommitter;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
@@ -11,8 +14,10 @@ import org.bouncycastle.crypto.signers.PSSSigner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -34,6 +39,14 @@ public class CryptoUtils {
         signer.update(message, 0, message.length);
 
         return signer.verifySignature(signature);
+    }
+
+    public static Boolean verifyCommitment(byte[] commitmentBytes, String message, byte[] commitmentSecret) {
+        Committer committer = new GeneralHashCommitter(new SHA256Digest(), new SecureRandom());
+        byte[] voteBytes = message.getBytes(StandardCharsets.UTF_8);
+        Commitment commitment = new Commitment(commitmentSecret, commitmentBytes);
+
+        return committer.isRevealed(commitment, voteBytes);
     }
 
     public static RSAKey createRSAKeyFromString(String key) {

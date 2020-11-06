@@ -1,15 +1,10 @@
 import data.Ballot;
 import helper.CryptoUtils;
-import org.bouncycastle.crypto.Commitment;
-import org.bouncycastle.crypto.Committer;
-import org.bouncycastle.crypto.commitments.GeneralHashCommitter;
-import org.bouncycastle.crypto.digests.SHA256Digest;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
@@ -155,7 +150,6 @@ public class VotingCounter {
                     byte[] signature = Base64.getDecoder().decode(signatureString);
 
                     castVote(pollId, commitment, signature);
-//                    writeBallotsFile();
                 }
                 System.out.println("Received data");
             } catch (IOException e) {
@@ -279,20 +273,12 @@ public class VotingCounter {
             }
 
             // Open commitment and check if valid
-            Committer committer = new GeneralHashCommitter(new SHA256Digest(), new SecureRandom());
-            byte[] voteBytes = vote.getBytes(StandardCharsets.UTF_8);
-            Commitment commitment = new Commitment(commitmentSecret, ballot.getCommitment());
-
-            boolean isValid;
-            try {
-                isValid = committer.isRevealed(commitment, voteBytes);
-            } catch (Exception e) {
+            Boolean commitmentIsValid = CryptoUtils.verifyCommitment(ballot.getCommitment(), vote, commitmentSecret);
+            if(!commitmentIsValid) {
                 resultForClient = COUNTER_RESULT_VOTE_NOT_VALID;
                 System.out.println("Failed checking validity with the given inputs.");
-                return;
             }
-
-            if (isValid) {
+            else {
                 ConcurrentHashMap<String, Integer> validVoteList;
                 Set<Integer> alreadyOpenedList;
                 Integer voteCount = 0;
@@ -315,10 +301,7 @@ public class VotingCounter {
 
                 resultForClient = COUNTER_RESULT_VOTE_VALID;
                 System.out.println("Vote was valid.");
-                return;
             }
-            resultForClient = COUNTER_RESULT_VOTE_NOT_VALID;
-            System.out.println("Vote was NOT invalid.");
         }
 
         private void sendResultToClient() {
